@@ -4,8 +4,9 @@ const MONGODB_URI = process.env.MONGODB_URI
 
 if (!MONGODB_URI) {
   throw new Error(
-    '请定义 MONGODB_URI 环境变量。' +
-    '在 .env.local 文件中添加 MONGODB_URI，或在 Vercel Dashboard 中设置环境变量。'
+    '❌ MONGODB_URI 环境变量未定义。\n' +
+    '请在 .env.local 文件中添加 MONGODB_URI，或在 Vercel Dashboard 的 Environment Variables 中设置。\n' +
+    '格式: mongodb+srv://username:password@cluster.mongodb.net/database?retryWrites=true&w=majority'
   )
 }
 
@@ -24,9 +25,15 @@ if (!global.mongoose) {
   global.mongoose = cached
 }
 
+// 标记是否已经记录过连接成功日志（避免重复日志）
+let hasLoggedConnection = false
+
 /**
  * 连接到 MongoDB 数据库
- * 使用连接池缓存，避免在服务器less环境中重复创建连接
+ * 使用连接池缓存，避免在 serverless 环境中重复创建连接
+ * 
+ * 在 Vercel 等 serverless 环境中，每次函数调用可能会创建新的实例，
+ * 但通过全局变量缓存连接，可以复用已有的连接，提高性能。
  */
 async function connectDB() {
   // 如果已经有缓存的连接，直接返回
@@ -44,8 +51,10 @@ async function connectDB() {
     }
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
-      if (process.env.NODE_ENV !== 'production') {
-        console.log('✅ MongoDB 连接成功')
+      // 只在首次连接成功时记录日志
+      if (!hasLoggedConnection) {
+        console.log('✅ Connected to MongoDB')
+        hasLoggedConnection = true
       }
       return mongoose
     }).catch((error) => {

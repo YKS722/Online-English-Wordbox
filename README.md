@@ -72,6 +72,8 @@ MONGODB_URI=mongodb://localhost:27017/english-learning
 # MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/english-learning
 
 # NextAuth配置
+# 开发环境: http://localhost:3000
+# 生产环境: https://your-domain.vercel.app (替换为你的 Vercel 域名)
 NEXTAUTH_URL=http://localhost:3000
 NEXTAUTH_SECRET=your-secret-key-here
 # 生成密钥: openssl rand -base64 32
