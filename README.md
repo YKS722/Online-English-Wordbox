@@ -73,7 +73,7 @@ MONGODB_URI=mongodb://localhost:27017/english-learning
 
 # NextAuth配置
 # 开发环境: http://localhost:3000
-# 生产环境: https://your-domain.vercel.app (替换为你的 Vercel 域名)
+# 生产环境: https://your-domain.com (替换为你的生产域名)
 NEXTAUTH_URL=http://localhost:3000
 NEXTAUTH_SECRET=your-secret-key-here
 # 生成密钥: openssl rand -base64 32
@@ -208,29 +208,65 @@ npm start
 
 ## 部署
 
-### Vercel部署（推荐）
+### GitHub Actions CI/CD
 
-详细的部署指南请参阅 [DEPLOYMENT.md](./DEPLOYMENT.md)
+项目已配置 GitHub Actions 工作流，支持自动化构建和部署。
 
-快速步骤：
-1. 将代码推送到 GitHub/GitLab/Bitbucket
-2. 在 [Vercel Dashboard](https://vercel.com/dashboard) 中导入项目
-3. 配置环境变量（在 Vercel Dashboard 的 Environment Variables 中设置）
-4. 部署
+#### 工作流说明
 
-#### 必需的环境变量
+1. **CI 工作流** (`.github/workflows/ci.yml`)
+   - 自动在推送代码或创建 Pull Request 时触发
+   - 在多个 Node.js 版本上测试构建
+   - 运行 Linter 检查代码质量
+   - 构建项目确保没有错误
 
+2. **部署工作流** (`.github/workflows/deploy.yml`)
+   - 在推送到 `main` 分支时自动触发
+   - 构建生产版本
+   - 准备部署到生产环境
+
+#### 配置 GitHub Secrets
+
+在 GitHub 仓库设置中添加以下 Secrets：
+**Settings → Secrets and variables → Actions → New repository secret**
+
+**必需的环境变量：**
 - `MONGODB_URI`: MongoDB 连接字符串
-- `NEXTAUTH_URL`: NextAuth 回调 URL（生产环境使用你的 Vercel 域名）
+- `NEXTAUTH_URL`: NextAuth 回调 URL（生产环境使用你的域名）
 - `NEXTAUTH_SECRET`: NextAuth 密钥（使用 `openssl rand -base64 32` 生成）
 
-#### 可选的环境变量
-
+**可选的环境变量：**
 - `OPENAI_API_KEY`: OpenAI API 密钥（用于 AI 功能）
 - `GOOGLE_CLIENT_ID`: Google OAuth Client ID
 - `GOOGLE_CLIENT_SECRET`: Google OAuth Client Secret
 
-**注意**：在 Vercel 上，NextAuth 会自动检测 `VERCEL_URL`，但建议手动设置 `NEXTAUTH_URL` 以确保一致性。
+#### 部署平台选项
+
+**Railway** (推荐)
+- 连接 GitHub 仓库，自动部署
+- 在 Railway Dashboard 中设置环境变量
+- 支持自动部署和预览环境
+
+**Render**
+- 创建 Web Service，连接 GitHub 仓库
+- 构建命令：`npm install && npm run build`
+- 启动命令：`npm start`
+- 在 Render Dashboard 中设置环境变量
+
+**Fly.io**
+- 使用 Fly CLI：`fly launch` 和 `fly deploy`
+- 在 Fly.io Dashboard 中设置环境变量
+
+**自托管服务器**
+- 使用 PM2 管理进程
+- 设置环境变量文件
+- 配置 Nginx 反向代理
+
+**Docker**
+- 使用提供的 Dockerfile 构建镜像
+- 运行容器并挂载环境变量
+
+详细部署说明请参阅 [`.github/workflows/README.md`](.github/workflows/README.md)
 
 ### 数据库部署
 

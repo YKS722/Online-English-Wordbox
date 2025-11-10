@@ -5,7 +5,7 @@ const MONGODB_URI = process.env.MONGODB_URI
 if (!MONGODB_URI) {
   throw new Error(
     '❌ MONGODB_URI 环境变量未定义。\n' +
-    '请在 .env.local 文件中添加 MONGODB_URI，或在 Vercel Dashboard 的 Environment Variables 中设置。\n' +
+    '请在 .env.local 文件中添加 MONGODB_URI，或在生产环境的环境变量中设置。\n' +
     '格式: mongodb+srv://username:password@cluster.mongodb.net/database?retryWrites=true&w=majority'
   )
 }
@@ -32,7 +32,7 @@ let hasLoggedConnection = false
  * 连接到 MongoDB 数据库
  * 使用连接池缓存，避免在 serverless 环境中重复创建连接
  * 
- * 在 Vercel 等 serverless 环境中，每次函数调用可能会创建新的实例，
+ * 在 serverless 环境中，每次函数调用可能会创建新的实例，
  * 但通过全局变量缓存连接，可以复用已有的连接，提高性能。
  */
 async function connectDB() {

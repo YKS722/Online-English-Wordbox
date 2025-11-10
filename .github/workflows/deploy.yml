@@ -1,0 +1,70 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 构建项目
+        run: npm run build
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+
+      - name: 部署到生产环境
+        run: |
+          echo "🚀 构建完成！"
+          echo "📦 构建产物位于 .next 目录"
+          echo ""
+          echo "💡 提示："
+          echo "   1. 如果你使用 Railway/Render/Fly.io 等平台，它们会自动检测到构建产物"
+          echo "   2. 如果你使用自己的服务器，可以使用以下命令部署："
+          echo "      npm run build"
+          echo "      npm start"
+          echo "   3. 或者使用 Docker 容器化部署"
+
+      # 如果你使用特定的部署平台，可以在这里添加相应的步骤
+      # 例如：Railway, Render, Fly.io, 或者通过 SSH 部署到自己的服务器
+
+      # 示例：部署到 Railway (如果使用 Railway CLI)
+      # - name: 部署到 Railway
+      #   run: |
+      #     npm install -g @railway/cli
+      #     railway up
+
+      # 示例：通过 SSH 部署到服务器
+      # - name: 部署到服务器
+      #   uses: appleboy/ssh-action@master
+      #   with:
+      #     host: ${{ secrets.HOST }}
+      #     username: ${{ secrets.USERNAME }}
+      #     key: ${{ secrets.SSH_KEY }}
+      #     script: |
+      #       cd /path/to/your/app
+      #       git pull
+      #       npm ci
+      #       npm run build
+      #       pm2 restart your-app-name
+
